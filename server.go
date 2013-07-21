@@ -5,8 +5,10 @@ import (
   "net/http"
   "regexp"
 //  "errors"
+  "os"
   "fmt"
   "strings"
+  "log"
 )
 
 var titleValidator = regexp.MustCompile("^[a-zA-Z0-9]+$")
@@ -44,10 +46,23 @@ func defaultHandler(w http.ResponseWriter, r *http.Request) {
     }
     body, err := ioutil.ReadFile(filename)
     if err != nil {
-      http.Error(w,err.Error(), http.StatusNotFound)
+      
+      errorHandler(w, r, err)
       return
     }
     fmt.Fprintf(w, string(body))
+}
+
+func errorHandler(w http.ResponseWriter, r *http.Request, err error) {
+  w.Header().Set("Content-Type", "text/html; charset=utf-8")
+  switch err.(type) {
+  case *os.PathError:
+    body,_ := ioutil.ReadFile("error/404.html")
+    w.WriteHeader(http.StatusNotFound)
+    fmt.Fprintf(w, "%s",string(body))
+  default:
+    http.Error(w,"Fatal Error", http.StatusInternalServerError)
+  }
 }
 
 func makeHandler(fn func(http.ResponseWriter, *http.Request)) http.HandlerFunc {
@@ -58,6 +73,11 @@ func makeHandler(fn func(http.ResponseWriter, *http.Request)) http.HandlerFunc {
 }
 
 func main() {
+  port := ":" + os.Args[1]
+  fmt.Println(port)
   http.HandleFunc("/", makeHandler(defaultHandler))
-  http.ListenAndServe(":8080", nil)
+  err := http.ListenAndServe(port, nil)
+  if err != nil {
+    log.Fatal("ListenAndServe: ", err)
+  }
 }
