@@ -75,12 +75,23 @@ func makeHandler(fn func(http.ResponseWriter, *http.Request)) http.HandlerFunc {
   }
 }
 
-func main() {
-  port := ":" + os.Args[1]
-  fmt.Println(port)
-  http.HandleFunc("/", makeHandler(defaultHandler))
-  err := http.ListenAndServe(port, nil)
+func setupServer(port string) {
+	s := &http.Server{
+		Addr:           port,
+		Handler:        makeHandler(defaultHandler),
+	}
+	log.Printf("Starting server at port %s", port[1:])
+  err := s.ListenAndServe()
   if err != nil {
     log.Fatal("ListenAndServe: ", err)
   }
+}
+
+func main() {
+
+	port := DEFAULT_PORT
+	if len(os.Args) > 1 {
+		port = ":" + os.Args[1]
+	}
+	setupServer(port)
 }
