@@ -4,7 +4,6 @@ import (
   "io/ioutil"
   "net/http"
   "regexp"
-//  "errors"
   "os"
   "fmt"
   "strings"
