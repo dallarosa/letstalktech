@@ -10,6 +10,10 @@ import (
   "log"
 )
 
+const (
+	DEFAULT_PORT = ":8080"
+)
+
 var titleValidator = regexp.MustCompile("^[a-zA-Z0-9]+$")
 var jsFileValidator = regexp.MustCompile(".+js$")
 var cssFileValidator = regexp.MustCompile(".+css$")
